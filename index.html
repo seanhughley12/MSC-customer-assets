@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MSC Scout Freight Watchtower</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("clawpilotTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 212px minmax(0, 1fr);
+      gap: 16px;
+      padding: 18px;
+    }
+    .rail {
+      position: sticky;
+      top: 18px;
+      height: calc(100vh - 36px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+      padding: 12px;
+      box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+    }
+    .mark {
+      display: grid;
+      place-items: center;
+      min-height: 76px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-bg-elevated);
+      padding: 14px;
+    }
+    .mark img {
+      max-width: 116px;
+      max-height: 48px;
+      object-fit: contain;
+    }
+    .rail button {
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface-soft);
+      color: var(--cp-text);
+      padding: 11px 12px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+    }
+    .rail button.active {
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      border-color: var(--cp-accent);
+    }
+    main {
+      display: grid;
+      gap: 16px;
+      min-width: 0;
+    }
+    .hero {
+      min-height: 560px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 28px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, var(--cp-overlay), var(--cp-panel), transparent),
+        url("https://assets.msc.com/api/public/content/e06e592f872d461da54db52e99e85886?v=69a059ce");
+      background-size: cover;
+      background-position: center;
+      padding: 28px;
+      box-shadow: var(--cp-shadow);
+    }
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+    }
+    .badge, .topline a, .hero-actions button, .hero-actions a, .module-head button {
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      padding: 9px 12px;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 850;
+      letter-spacing: .7px;
+      text-transform: uppercase;
+    }
+    .badge {
+      color: var(--cp-text-muted);
+      background: var(--cp-surface-soft);
+    }
+    .hero-copy {
+      align-self: end;
+      max-width: 1060px;
+    }
+    .eyebrow, .module-head span, .prompt-card span, .signal-board span {
+      display: block;
+      color: var(--cp-accent);
+      font-size: 11px;
+      font-weight: 850;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 14px 0 16px;
+      max-width: 1120px;
+      color: var(--cp-text);
+      font-size: clamp(48px, 8vw, 118px);
+      line-height: .84;
+      letter-spacing: -6px;
+    }
+    h2 {
+      margin: 8px 0 10px;
+      font-size: clamp(30px, 4vw, 58px);
+      line-height: .92;
+      letter-spacing: -2.5px;
+    }
+    h3 {
+      margin: 8px 0 10px;
+      font-size: 26px;
+      line-height: 1.05;
+      letter-spacing: -1px;
+    }
+    p {
+      margin: 0;
+      color: var(--cp-text-muted);
+      line-height: 1.55;
+      font-size: 15px;
+    }
+    .hero-copy p {
+      max-width: 740px;
+      font-size: 18px;
+      color: var(--cp-text);
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+    .hero-actions button:first-child {
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      border-color: var(--cp-accent);
+    }
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .metric, .module, .prompt-card, .monitor-button, .brief-line, .signal-board div, .demo-finding, .automation-card, .output-preview div {
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+      box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+    }
+    .metric {
+      padding: 16px;
+      background: var(--cp-panel-strong);
+    }
+    .metric span {
+      color: var(--cp-text-muted);
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .metric b {
+      display: block;
+      margin-top: 6px;
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-size: 22px;
+    }
+    .page {
+      display: none;
+      gap: 16px;
+    }
+    .page.active {
+      display: grid;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .module {
+      padding: 18px;
+    }
+    .module-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .proof-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .proof-strip b {
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-accent-soft);
+      padding: 13px;
+      color: var(--cp-text);
+      font-family: Consolas, "Courier New", Courier, monospace;
+    }
+    ol {
+      margin: 0 0 16px;
+      padding-left: 20px;
+    }
+    li {
+      margin: 8px 0;
+      color: var(--cp-text);
+      font-weight: 750;
+    }
+    .prompt-deck {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(230px, 1fr));
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .prompt-card {
+      min-height: 360px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+      padding: 16px;
+    }
+    .prompt-card p {
+      font-size: 13px;
+      color: var(--cp-text);
+    }
+    .prompt-card small {
+      color: var(--cp-text-muted);
+      line-height: 1.45;
+    }
+    .watchtower-layout {
+      display: grid;
+      grid-template-columns: minmax(260px, .85fr) minmax(0, 1.35fr) minmax(280px, .85fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .monitor-list {
+      display: grid;
+      gap: 10px;
+    }
+    .monitor-button {
+      display: grid;
+      gap: 6px;
+      padding: 14px;
+      text-align: left;
+      color: var(--cp-text);
+    }
+    .monitor-button.active {
+      border-color: var(--cp-accent);
+      background: var(--cp-accent-soft);
+    }
+    .monitor-button span, .monitor-button small {
+      color: var(--cp-text-muted);
+      line-height: 1.35;
+    }
+    .signal-board {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .signal-board div, .brief-line {
+      padding: 14px;
+    }
+    .signal-board b {
+      display: block;
+      margin-top: 6px;
+      line-height: 1.35;
+    }
+    .brief-list {
+      display: grid;
+      gap: 10px;
+    }
+    .brief-line b {
+      display: block;
+      color: var(--cp-accent);
+      font-size: 11px;
+      font-weight: 850;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .demo-findings {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .demo-finding {
+      display: grid;
+      grid-template-columns: 72px minmax(0, .72fr) minmax(0, 1.2fr);
+      gap: 12px;
+      align-items: start;
+      padding: 14px;
+    }
+    .demo-finding b, .automation-card span, .output-preview b {
+      color: var(--cp-accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 11px;
+    }
+    .demo-finding span, .automation-card b, .output-preview span {
+      color: var(--cp-text);
+      font-weight: 850;
+      line-height: 1.35;
+    }
+    .demo-finding small, .automation-card small, .output-preview small {
+      color: var(--cp-text-muted);
+      line-height: 1.45;
+    }
+    .automation-card {
+      display: grid;
+      gap: 7px;
+      padding: 14px;
+    }
+    .demo-board {
+      display: grid;
+    }
+    .output-preview {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .output-preview div {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+    }
+    .source-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .source-grid a {
+      display: block;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface-soft);
+      color: var(--cp-link);
+      padding: 14px;
+      text-decoration: none;
+      font-weight: 750;
+      line-height: 1.35;
+    }
+    .safe-note {
+      border-left: 4px solid var(--cp-success);
+      background: var(--cp-surface);
+      padding: 14px 16px;
+      border-radius: 0.625rem;
+      color: var(--cp-text-muted);
+    }
+
+    /* MSC customer-facing brand treatment: maritime command room, cream copy, gold signal. */
+    body {
+      background:
+        radial-gradient(circle at 82% 4%, color-mix(in srgb, var(--cp-warning) 22%, transparent), transparent 30%),
+        radial-gradient(circle at 20% 18%, color-mix(in srgb, var(--cp-link) 28%, transparent), transparent 34%),
+        linear-gradient(135deg, color-mix(in srgb, var(--cp-link) 14%, var(--cp-text) 86%), color-mix(in srgb, var(--cp-link) 24%, var(--cp-text) 76%) 52%, color-mix(in srgb, var(--cp-link) 34%, var(--cp-text) 66%));
+    }
+    .shell {
+      background:
+        linear-gradient(90deg, color-mix(in srgb, var(--cp-text) 34%, transparent), transparent 30%),
+        transparent;
+    }
+    .rail {
+      border-color: color-mix(in srgb, var(--cp-bg) 18%, transparent);
+      background: color-mix(in srgb, var(--cp-text) 82%, var(--cp-link) 18%);
+      box-shadow: 0 0 2px color-mix(in srgb, var(--cp-text) 22%, transparent), 0 18px 44px color-mix(in srgb, var(--cp-text) 38%, transparent);
+    }
+    .mark {
+      border-color: color-mix(in srgb, var(--cp-bg) 18%, transparent);
+      background: var(--cp-bg);
+      min-height: 92px;
+      border-radius: 18px;
+    }
+    .mark img {
+      max-width: 132px;
+      max-height: 62px;
+    }
+    .rail button {
+      border-color: color-mix(in srgb, var(--cp-bg) 18%, transparent);
+      background: color-mix(in srgb, var(--cp-sheen) 8%, transparent);
+      color: color-mix(in srgb, var(--cp-bg) 82%, transparent);
+      border-radius: 16px;
+    }
+    .rail button.active {
+      background: var(--cp-warning);
+      color: color-mix(in srgb, var(--cp-text) 88%, var(--cp-link) 12%);
+      border-color: var(--cp-warning);
+    }
+    .safe-note {
+      border-left-color: var(--cp-warning);
+      background: color-mix(in srgb, var(--cp-bg) 10%, transparent);
+      color: color-mix(in srgb, var(--cp-bg) 76%, transparent);
+    }
+    .hero {
+      min-height: 620px;
+      border-color: color-mix(in srgb, var(--cp-bg) 18%, transparent);
+      border-radius: 34px;
+      background:
+        linear-gradient(90deg, color-mix(in srgb, var(--cp-text) 92%, var(--cp-link) 8%), color-mix(in srgb, var(--cp-text) 70%, var(--cp-link) 30%) 44%, color-mix(in srgb, var(--cp-text) 18%, transparent)),
+        linear-gradient(0deg, color-mix(in srgb, var(--cp-text) 68%, transparent), transparent 54%),
+        url("https://assets.msc.com/api/public/content/e06e592f872d461da54db52e99e85886?v=69a059ce");
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 34px 90px color-mix(in srgb, var(--cp-text) 42%, transparent);
+      position: relative;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto 30px 30px auto;
+      width: min(42vw, 560px);
+      height: 130px;
+      border-right: 2px solid color-mix(in srgb, var(--cp-warning) 60%, transparent);
+      border-bottom: 2px solid color-mix(in srgb, var(--cp-warning) 60%, transparent);
+      border-radius: 0 0 34px 0;
+      opacity: .72;
+      pointer-events: none;
+    }
+    .topline,
+    .hero-copy,
+    .metric-row {
+      position: relative;
+      z-index: 1;
+    }
+    .badge,
+    .topline a,
+    .hero-actions a,
+    .module-head button {
+      border-color: color-mix(in srgb, var(--cp-bg) 22%, transparent);
+      background: color-mix(in srgb, var(--cp-bg) 10%, transparent);
+      color: var(--cp-bg);
+    }
+    .hero-actions button:first-child {
+      background: var(--cp-warning);
+      color: color-mix(in srgb, var(--cp-text) 88%, var(--cp-link) 12%);
+      border-color: var(--cp-warning);
+    }
+    .eyebrow,
+    .module-head span,
+    .prompt-card span,
+    .signal-board span {
+      color: var(--cp-warning);
+    }
+    h1,
+    .hero-copy p {
+      color: var(--cp-bg);
+    }
+    .metric,
+    .module,
+    .prompt-card,
+    .monitor-button,
+    .brief-line,
+    .signal-board div,
+    .demo-finding,
+    .automation-card,
+    .output-preview div {
+      border-color: color-mix(in srgb, var(--cp-bg) 16%, transparent);
+      background: color-mix(in srgb, var(--cp-bg) 8%, transparent);
+      color: var(--cp-bg);
+      box-shadow: none;
+    }
+    .metric {
+      background: color-mix(in srgb, var(--cp-bg) 12%, transparent);
+      backdrop-filter: blur(8px);
+    }
+    .metric span,
+    .monitor-button span,
+    .monitor-button small,
+    .prompt-card small,
+    .demo-finding small,
+    .automation-card small,
+    .output-preview small,
+    p {
+      color: color-mix(in srgb, var(--cp-bg) 72%, transparent);
+    }
+    .metric b,
+    h2,
+    h3,
+    li,
+    .prompt-card p,
+    .monitor-button,
+    .signal-board b,
+    .brief-line span,
+    .demo-finding span,
+    .automation-card b,
+    .output-preview span {
+      color: var(--cp-bg);
+    }
+    .proof-strip b,
+    .monitor-button.active {
+      border-color: color-mix(in srgb, var(--cp-warning) 74%, transparent);
+      background: color-mix(in srgb, var(--cp-warning) 16%, transparent);
+    }
+    .proof-strip b,
+    .brief-line b,
+    .demo-finding b,
+    .automation-card span,
+    .output-preview b {
+      color: var(--cp-warning);
+    }
+    .source-grid a {
+      border-color: color-mix(in srgb, var(--cp-bg) 16%, transparent);
+      background: color-mix(in srgb, var(--cp-bg) 8%, transparent);
+      color: var(--cp-bg);
+    }
+    @media (max-width: 1050px) {
+      .shell { grid-template-columns: 1fr; }
+      .rail { position: static; height: auto; }
+      .grid-2, .watchtower-layout, .metric-row, .source-grid, .output-preview { grid-template-columns: 1fr; }
+      .demo-finding { grid-template-columns: 1fr; }
+      h1 { letter-spacing: -3px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <div class="mark">
+        <img src="https://assets.msc.com/api/public/content/0d2d7d7124c84ecbbc73f0da9689f43b?v=18064e2e&la=en&h=713&w=658" alt="MSC logo" />
+      </div>
+      <button class="active" data-page-button="value">Scout value page</button>
+      <button data-page-button="watchtower">Live watchtower demo</button>
+      <button data-page-button="sources">Source anchors</button>
+      <div class="safe-note">Public-safe static page. No internal Microsoft, MSC private, CRM, transcript, or authenticated data is embedded.</div>
+    </aside>
+
+    <main>
+      <section class="hero">
+        <div class="topline">
+          <span class="badge">Mediterranean Shipping Company / Scout concept page</span>
+          <a href="https://www.msc.com/en/newsroom/media-kit?page=1" target="_blank" rel="noreferrer">Official MSC media kit</a>
+        </div>
+        <div class="hero-copy">
+          <span class="eyebrow">Governed freight watchtower</span>
+          <h1>Scout watches the business.</h1>
+          <p>Cowork is where a person runs a task. Scout is where MSC monitors risk, alerts when something changes, and prepares governed action with a human in the loop.</p>
+          <div class="hero-actions">
+            <button data-page-link="watchtower">Open the live demo</button>
+            <a href="https://www.msc.com/en/solutions/digital-solutions" target="_blank" rel="noreferrer">MSC digital solutions</a>
+          </div>
+        </div>
+        <div class="metric-row">
+          <div class="metric"><span>Global routes</span><b>300</b></div>
+          <div class="metric"><span>Ports</span><b>520</b></div>
+          <div class="metric"><span>Countries</span><b>155+</b></div>
+          <div class="metric"><span>Vessels</span><b>1,000</b></div>
+        </div>
+      </section>
+
+      <section class="page active" data-page="value">
+        <div class="grid-2">
+          <article class="module">
+            <div class="module-head"><span>The CIO framing</span></div>
+            <h2>Controlled AI operations, not more AI usage.</h2>
+            <p>For MSC, Scout can monitor rate changes, vessel and lane risk, customer advisories, reefer exceptions, smart container events, eBL and documentation friction, DCSA/API standards, regulatory exposure, sustainability claims, and AI consumption governance.</p>
+            <div class="proof-strip">
+              <b>myMSC</b><b>iReefer</b><b>eBL</b><b>DCSA APIs</b>
+            </div>
+          </article>
+          <article class="module">
+            <div class="module-head"><span>Undeniable test sequence</span><button>Human in loop</button></div>
+            <ol>
+              <li>Run Global disruption watch.</li>
+              <li>Run Competitive rate movement monitor.</li>
+              <li>Run Customer advisory digest.</li>
+              <li>Run Reefer exception intelligence.</li>
+              <li>Run AI consumption control plane.</li>
+            </ol>
+            <p><b>Automation rule:</b> after each output, ask Clement whether the output is useful enough to monitor continuously. If yes, promote only the highest-value one or two into automations so scheduled monitors do not overlap.</p>
+          </article>
+        </div>
+
+        <article class="module">
+          <div class="module-head"><span>CIO-wowing prompts</span><button>Copy into Scout</button></div>
+          <div class="prompt-deck">
+            <article class="prompt-card">
+              <div><span>Run first</span><h3>Global disruption watch</h3></div>
+              <p>Act as an MSC Cargo operations risk analyst. Search public maritime, port, carrier advisory, and trade sources from the last 7 days. Build a disruption brief for MSC-operated cargo movements. Focus on vessel incidents, port congestion, strikes, canal restrictions, sanctions, weather, war-risk zones, and AIS anomalies. Return an executive summary for the CIO, top 10 risks ranked by business impact, what changed in the last 24 hours, and what Scout should keep monitoring every 2 hours.</p>
+              <small>Proves Scout can watch external business risk across the freight network.</small>
+            </article>
+            <article class="prompt-card">
+              <div><span>Commercial</span><h3>Competitive rate movement monitor</h3></div>
+              <p>Act as an MSC commercial intelligence analyst. Monitor public freight rate, surcharge, GRI, PSS, BAF, CAF, and emergency surcharge updates across MSC, Maersk, CMA CGM, Hapag-Lloyd, COSCO, and ONE for the last 30 days. Focus on Asia-Europe, Transpacific, Mediterranean, Middle East, West Africa, and Central Africa lanes. Return lane, carrier, change type, effective date, customer impact, recommended MSC commercial response, and anything Scout should monitor every 2 hours.</p>
+              <small>Turns rate-change monitoring into a governed commercial intelligence motion.</small>
+            </article>
+            <article class="prompt-card">
+              <div><span>Service</span><h3>Customer advisory digest</h3></div>
+              <p>Search MSC customer advisories from the last 30 days. Summarize every surcharge, GRI, PSS, schedule change, documentation change, port omission, blank sailing, customs advisory, and emergency notice. Group by trade lane and effective date. Create a customer-service-ready brief with what changed, who is affected, what action customers need to take, and which advisories need proactive outreach today.</p>
+              <small>Saves customer service and sales from manually reading every advisory update.</small>
+            </article>
+            <article class="prompt-card">
+              <div><span>Cold chain</span><h3>Reefer exception intelligence</h3></div>
+              <p>Act as an MSC iReefer operations analyst. Build a monitoring plan for refrigerated cargo exceptions using iReefer-style telemetry: temperature, humidity, GPS location, door open, off-power events, defrost periods, Controlled Atmosphere, and Cold Treatment compliance. Use public MSC iReefer capabilities and best-practice cold-chain rules. Return the top exception patterns that should trigger alerts for pharma, fruit, frozen food, and flowers.</p>
+              <small>Makes Scout the operating layer over a real MSC digital product.</small>
+            </article>
+            <article class="prompt-card">
+              <div><span>Governance</span><h3>AI consumption control plane</h3></div>
+              <p>Act as MSC’s AI consumption governance analyst. Build a daily control-plane report for Copilot, Cowork, Scout, Copilot Studio, and agent usage. Show total spend, spend by tool, spend by business unit, top users, inactive licenses, high-consumption anomalies, repeated failed tasks, and estimated business value. Flag anything that risks exceeding the approved monthly cap. Recommend which workloads should run in Cowork, which should run in Scout, and which should not run at all.</p>
+              <small>Answers cost, governance, and predictability before they block scale.</small>
+            </article>
+          </div>
+        </article>
+      </section>
+
+      <section class="page" data-page="watchtower">
+        <div class="watchtower-layout">
+          <article class="module monitor-list">
+            <div class="module-head"><span>Scout monitors</span><button>Example watches</button></div>
+            <button class="monitor-button active" data-monitor="0"><b>Kribi corridor watch</b><span>MSC public intermodal news, port updates, inland corridor notices</span><small>Watching / Weekly or event based</small></button>
+            <button class="monitor-button" data-monitor="1"><b>Surcharge advisory monitor</b><span>MSC public customer advisories, PSS, GRI, BAF, CAF, emergency fees</span><small>Ready to run / Every 2 hours</small></button>
+            <button class="monitor-button" data-monitor="2"><b>Track & Trace adoption watch</b><span>MSC digital solution announcements and customer tracking updates</span><small>Watching / Daily</small></button>
+            <button class="monitor-button" data-monitor="3"><b>iReefer exceptions</b><span>Temperature, humidity, off-power, door-open, CT compliance</span><small>Design pattern / Event based</small></button>
+            <button class="monitor-button" data-monitor="4"><b>LNG transition watch</b><span>MSC sustainability news, LNG operations, safety and compliance proof points</span><small>Watching / Weekly</small></button>
+          </article>
+
+          <article class="module">
+            <div class="module-head"><span>Example Scout output</span><button id="monitor-status">Watching</button></div>
+            <h2 id="monitor-title">Kribi corridor watch</h2>
+            <p id="monitor-output">Public MSC example: MSC integrated the Port of Kribi into a door-to-door intermodal solution connecting Cameroon with Chad and Central African Republic. Scout turns that announcement into a monitorable corridor brief.</p>
+            <div class="demo-findings" id="monitor-findings">
+              <div class="demo-finding"><b>Data source</b><span>Kribi corridor</span><small>Door-to-door service links Kribi to Yaoundé, Moundou, N’Djamena, and Bangui.</small></div>
+              <div class="demo-finding"><b>Data source</b><span>Service pattern</span><small>MSC cites up to four weekly vessel calls and direct services connecting Cameroon to Asia.</small></div>
+              <div class="demo-finding"><b>Monitor</b><span>Execution risk</span><small>Watch documentation, customs clearance, inland road movement, and real-time tracking updates.</small></div>
+            </div>
+            <div class="signal-board">
+              <div><span>Cadence</span><b id="monitor-cadence">Weekly or event based</b></div>
+              <div><span>Signal surface</span><b id="monitor-signal">MSC public intermodal news, port updates, inland corridor notices</b></div>
+              <div><span>Governance</span><b>Ask Clement before automation. Keep active monitors to one or two.</b></div>
+            </div>
+          </article>
+
+          <article class="module">
+            <div class="module-head"><span>Recommended actions</span><button>Human-approved</button></div>
+            <div class="brief-list">
+              <div class="brief-line"><b>Scout says</b><span id="monitor-action-output">Central Africa corridor brief for operations, sales, and customer service.</span></div>
+              <div id="monitor-actions">
+                <div class="brief-line"><b>Next</b><span>Create a customer-ready corridor brief.</span></div>
+                <div class="brief-line"><b>Next</b><span>Monitor public updates on Kribi, Chad, and CAR inland lanes.</span></div>
+                <div class="brief-line"><b>Next</b><span>Ask Clement if this should become a weekly corridor automation.</span></div>
+              </div>
+              <div class="automation-card">
+                <span>Automation gate</span>
+                <b>Ask Clement: “Is this useful enough to monitor continuously?”</b>
+                <small>If yes, promote only one or two monitors so scheduled runs do not overlap.</small>
+              </div>
+            </div>
+          </article>
+        </div>
+        <article class="module demo-board">
+          <div class="module-head"><span>How to read the demo</span><button>Public-safe sample</button></div>
+          <div class="output-preview">
+            <div><b>1</b><span>Signal collected</span><small>Scout reads public advisories, maritime news, carrier pages, and standards updates.</small></div>
+            <div><b>2</b><span>Risk scored</span><small>Signals are grouped by lane, cargo type, customer impact, and urgency.</small></div>
+            <div><b>3</b><span>Action drafted</span><small>Scout prepares the CIO brief, customer-service bullets, and escalation path.</small></div>
+            <div><b>4</b><span>Human approves</span><small>Clement decides whether the result becomes a recurring automation.</small></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="page" data-page="sources">
+        <article class="module">
+          <div class="module-head"><span>Public source anchors</span><button>No private data</button></div>
+          <p>This page is built only from public MSC positioning and public prompt examples. It excludes transcripts, CRM, account notes, internal pricing discussions, private stakeholder maps, and authenticated Microsoft data.</p>
+          <div class="source-grid" style="margin-top: 16px;">
+            <a href="https://www.msc.com/en/solutions/digital-solutions" target="_blank" rel="noreferrer">MSC digital solutions: myMSC, smart containers, iReefer, eBL, direct integrations</a>
+            <a href="https://www.msc.com/en/solutions/digital-solutions/ireefer" target="_blank" rel="noreferrer">MSC iReefer: GPS, temperature, humidity, CT compliance, APIs</a>
+            <a href="https://www.msc.com/en/solutions/digital-solutions/smart-containers" target="_blank" rel="noreferrer">MSC smart containers: position, temperature, door-open status, alerts</a>
+            <a href="https://www.msc.com/en/solutions/digital-solutions/direct-integrations" target="_blank" rel="noreferrer">MSC direct integrations: EDI, X12, DCSA APIs, iReefer Ultimate API</a>
+            <a href="https://www.msc.com/en/solutions/digital-solutions/ebl" target="_blank" rel="noreferrer">MSC eBL: secure electronic bill of lading</a>
+            <a href="https://www.msc.com/en/sustainability/enabling-logistics-decarbonization" target="_blank" rel="noreferrer">MSC sustainability: net zero, LNG, biofuel, digital twins, rail and terminal decarbonization</a>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const monitors = [
+      {
+        title: "Kribi corridor watch",
+        status: "Watching",
+        cadence: "Weekly or event based",
+        signal: "MSC public intermodal news, port updates, inland corridor notices",
+        output: "Central Africa corridor brief for operations, sales, and customer service.",
+        summary: "Public MSC example: MSC integrated the Port of Kribi into a door-to-door intermodal solution connecting Cameroon with Chad and Central African Republic. Scout turns that announcement into a monitorable corridor brief.",
+        findings: [
+          ["Data source", "Kribi corridor", "Door-to-door service links Kribi to Yaoundé, Moundou, N’Djamena, and Bangui."],
+          ["Data source", "Service pattern", "MSC cites up to four weekly vessel calls and direct services connecting Cameroon to Asia."],
+          ["Monitor", "Execution risk", "Watch documentation, customs clearance, inland road movement, and real-time tracking updates."]
+        ],
+        actions: ["Create a customer-ready corridor brief.", "Monitor public updates on Kribi, Chad, and CAR inland lanes.", "Ask Clement if this should become a weekly corridor automation."]
+      },
+      {
+        title: "Surcharge advisory monitor",
+        status: "Ready to run",
+        cadence: "Every 2 hours",
+        signal: "MSC public customer advisories, PSS, GRI, BAF, CAF, emergency fees",
+        output: "Lane-by-lane surcharge impact brief.",
+        summary: "Public MSC example: MSC listed a Peak Season Surcharge advisory for trade from NWC, Scanbaltic, East Med, West Med, Adriatic, Greece, and Turkey to Australia and New Zealand. Scout turns advisories like this into commercial action.",
+        findings: [
+          ["Data source", "PSS advisory", "Trade scope includes NWC, Scanbaltic, East Med, West Med, Adriatic, Greece, and Turkey to Australia/New Zealand."],
+          ["Monitor", "Effective date", "Scout should extract effective dates and affected trade lanes from each public advisory."],
+          ["Action", "Commercial response", "Prepare lane-specific customer talk tracks and escalation notes."]
+        ],
+        actions: ["Generate advisory table by trade lane.", "Draft customer-service talking points.", "Automate only if Clement says the output is useful."]
+      },
+      {
+        title: "Track & Trace adoption watch",
+        status: "Watching",
+        cadence: "Daily",
+        signal: "MSC digital solution announcements and customer tracking updates",
+        output: "Digital adoption brief for customer service and SMB enablement.",
+        summary: "Public MSC example: MSC launched automatic email notifications for Track & Trace so customers can receive status changes without repeatedly checking the tracking page, even without a myMSC account or direct integration.",
+        findings: [
+          ["Data source", "Email notifications", "Customers can subscribe from tracking results using a bell icon or banner."],
+          ["Data source", "SMB fit", "MSC positions this as useful for customers without myMSC or direct integrations."],
+          ["Monitor", "Adoption signal", "Scout can watch digital-solution releases and draft enablement messages."]
+        ],
+        actions: ["Draft a customer enablement brief.", "Create a sales/service FAQ.", "Ask Clement whether this should be monitored for new digital releases."]
+      },
+      {
+        title: "iReefer exceptions",
+        status: "Design pattern",
+        cadence: "Event based",
+        signal: "Temperature, humidity, off-power, door-open, CT compliance",
+        output: "Exception severity, likely root cause, customer impact, and recommended action.",
+        summary: "Public MSC example: iReefer provides GPS position, temperature, humidity, Controlled Atmosphere overview, Cold Treatment compliance, off-power and defrost tracking, unlimited datalogs, and API access through iReefer Ultimate.",
+        findings: [
+          ["Data source", "Near real-time updates", "MSC says connected iReefer units typically transmit updates hourly when powered and in range."],
+          ["Data source", "Cold-chain evidence", "iReefer Pro includes CA overview, CT overview, off-power, defrost, and datalogs."],
+          ["Monitor", "Exception workflow", "Scout can turn telemetry patterns into exception cards and customer notification drafts."]
+        ],
+        actions: ["Generate exception card.", "Recommend customer notification language.", "Keep automation event-based, not overlapping."]
+      },
+      {
+        title: "LNG transition watch",
+        status: "Watching",
+        cadence: "Weekly",
+        signal: "MSC sustainability news, LNG operations, safety and compliance proof points",
+        output: "Sustainability and operations proof-point brief.",
+        summary: "Public MSC example: MSC USA completed its first LNG bunkering operation in the United States for MSC Maria Christina in Long Beach, receiving 6,800m3 of LNG from Seaspan Baker. MSC also cited a similar first-time East Coast operation for MSC Namibia in Savannah.",
+        findings: [
+          ["Data source", "Long Beach operation", "MSC Maria Christina received 6,800m3 of LNG at LGB Inner Anchorage after cargo operations."],
+          ["Data source", "Safety proof point", "MSC said the operation took place under U.S. Coast Guard supervision."],
+          ["Monitor", "Customer answer engine", "Scout can keep sustainability and safety proof points ready for commercial teams."]
+        ],
+        actions: ["Create LNG transition proof-point brief.", "Draft customer FAQ on safety and sustainability.", "Ask Clement if sustainability watch should be a weekly monitor."]
+      }
+    ];
+
+    function showPage(id) {
+      document.querySelectorAll("[data-page]").forEach((page) => {
+        page.classList.toggle("active", page.getAttribute("data-page") === id);
+      });
+      document.querySelectorAll("[data-page-button]").forEach((button) => {
+        button.classList.toggle("active", button.getAttribute("data-page-button") === id);
+      });
+    }
+
+    document.querySelectorAll("[data-page-button], [data-page-link]").forEach((button) => {
+      button.addEventListener("click", () => showPage(button.getAttribute("data-page-button") || button.getAttribute("data-page-link")));
+    });
+
+    document.querySelectorAll("[data-monitor]").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("[data-monitor]").forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        const monitor = monitors[Number(button.getAttribute("data-monitor"))];
+        document.getElementById("monitor-title").textContent = monitor.title;
+        document.getElementById("monitor-status").textContent = monitor.status;
+        document.getElementById("monitor-output").textContent = monitor.summary;
+        document.getElementById("monitor-cadence").textContent = monitor.cadence;
+        document.getElementById("monitor-signal").textContent = monitor.signal;
+        document.getElementById("monitor-action-output").textContent = monitor.output;
+        document.getElementById("monitor-findings").innerHTML = monitor.findings.map(([severity, title, detail]) =>
+          `<div class="demo-finding"><b>${severity}</b><span>${title}</span><small>${detail}</small></div>`
+        ).join("");
+        document.getElementById("monitor-actions").innerHTML = monitor.actions.map((action) =>
+          `<div class="brief-line"><b>Next</b><span>${action}</span></div>`
+        ).join("");
+      });
+    });
+  </script>
+</body>
+</html>
